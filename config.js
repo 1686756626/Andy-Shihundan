@@ -20,7 +20,7 @@ const CONFIG = {
         danger: '#ef4444'
     },
     chat: {
-        agentId: 'cZBDng',
+        agentId: 'vhN8Z7',
         apiBase: '/copaw-api',
         userId: 'andy-visitor',
         placeholder: '有什么想问的？尽管说...'
