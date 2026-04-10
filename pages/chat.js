@@ -1,15 +1,56 @@
 /**
- * pages/chat.js — AI 聊天页面
+ * pages/chat.js — AI 聊天页面（支持历史记录持久化）
  */
 Object.assign(app, {
-    _chatSessionId: String(Date.now()),
+    _chatSessionId: null,
     _chatStreaming: false,
     _chatController: null,
+    _storageKey: 'andy_chat_history',
+
+    _loadHistory() {
+        try {
+            const data = localStorage.getItem(this._storageKey);
+            if (!data) return [];
+            const parsed = JSON.parse(data);
+            // 恢复 session_id
+            if (parsed.sessionId) this._chatSessionId = parsed.sessionId;
+            return parsed.messages || [];
+        } catch (e) {
+            return [];
+        }
+    },
+
+    _saveHistory(messages) {
+        try {
+            localStorage.setItem(this._storageKey, JSON.stringify({
+                sessionId: this._chatSessionId,
+                messages: messages
+            }));
+        } catch (e) {}
+    },
+
+    _clearHistory() {
+        localStorage.removeItem(this._storageKey);
+        this._chatSessionId = String(Date.now());
+        this.renderChat(document.getElementById('content'));
+    },
 
     renderChat(el) {
+        // 初始化 session
+        if (!this._chatSessionId) {
+            const saved = this._loadHistory();
+            if (!this._chatSessionId) this._chatSessionId = String(Date.now());
+        }
+
+        const history = this._loadHistory();
+
         el.innerHTML = `
             <div class="chat-page">
-                <div class="chat-welcome" id="chat-welcome">
+                <div class="chat-toolbar">
+                    <span class="chat-toolbar-title">🤖 AI 聊天</span>
+                    ${history.length > 0 ? '<button class="chat-clear-btn" id="chat-clear" title="清空聊天记录">🗑️ 清空</button>' : ''}
+                </div>
+                <div class="chat-welcome" id="chat-welcome" style="${history.length > 0 ? 'display:none' : ''}">
                     <div class="emoji">🤖</div>
                     <h2>AI 聊天</h2>
                     <p>有什么想问的？尽管说。<br>别问 Andy 的丑事，太多了说不完。</p>
@@ -25,6 +66,22 @@ Object.assign(app, {
                 </div>
             </div>
         `;
+
+        // 渲染历史消息
+        if (history.length > 0) {
+            const msgs = document.getElementById('chat-messages');
+            history.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = 'chat-msg ' + msg.role;
+                div.innerHTML = '<div class="bubble">' + msg.html + '</div>';
+                msgs.appendChild(div);
+            });
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        // 清空按钮
+        const clearBtn = document.getElementById('chat-clear');
+        if (clearBtn) clearBtn.addEventListener('click', () => this._clearHistory());
 
         // auto-resize
         const ta = document.getElementById('chat-input');
@@ -64,6 +121,10 @@ Object.assign(app, {
         input.value = '';
         input.style.height = '48px';
         this._appendMsg('user', escapeHtml(text));
+
+        // 保存用户消息
+        const history = this._loadHistory();
+        history.push({ role: 'user', html: escapeHtml(text) });
 
         this._chatStreaming = true;
         btn.disabled = true;
@@ -147,13 +208,36 @@ Object.assign(app, {
             if (fullText) {
                 aiBubble.innerHTML = simpleMarkdown(fullText);
             } else {
+                fullText = '（无回复）';
                 aiBubble.innerHTML = '<span style="color:#6b7280">（无回复）</span>';
             }
             document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
 
+            // 保存 AI 回复
+            history.push({ role: 'ai', html: simpleMarkdown(fullText) });
+            this._saveHistory(history);
+
+            // 显示清空按钮
+            let clearBtn = document.getElementById('chat-clear');
+            if (!clearBtn) {
+                const toolbar = el.querySelector('.chat-toolbar');
+                if (toolbar) {
+                    clearBtn = document.createElement('button');
+                    clearBtn.className = 'chat-clear-btn';
+                    clearBtn.id = 'chat-clear';
+                    clearBtn.title = '清空聊天记录';
+                    clearBtn.textContent = '🗑️ 清空';
+                    clearBtn.addEventListener('click', () => this._clearHistory());
+                    toolbar.appendChild(clearBtn);
+                }
+            }
+
         } catch (err) {
             if (err.name !== 'AbortError') {
-                this._appendMsg('ai', '<span style="color:#ef4444">⚠️ ' + err.message + '</span>');
+                const errMsg = '<span style="color:#ef4444">⚠️ ' + err.message + '</span>';
+                this._appendMsg('ai', errMsg);
+                history.push({ role: 'ai', html: errMsg });
+                this._saveHistory(history);
             }
         } finally {
             this._chatStreaming = false;
