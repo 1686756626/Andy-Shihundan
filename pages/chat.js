@@ -220,7 +220,7 @@ Object.assign(app, {
             // 显示清空按钮
             let clearBtn = document.getElementById('chat-clear');
             if (!clearBtn) {
-                const toolbar = el.querySelector('.chat-toolbar');
+                const toolbar = document.querySelector('.chat-toolbar');
                 if (toolbar) {
                     clearBtn = document.createElement('button');
                     clearBtn.className = 'chat-clear-btn';
