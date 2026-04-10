@@ -125,17 +125,11 @@ sudo nginx -t && sudo nginx -s reload
 
 ---
 
-## 八、通用经验知识库联动
+## 八、通用经验知识库
 
-> 详细联动关系见 `knowledge-map.json`（机器可读）。
-
-知识库：[Web-Project-Template](https://github.com/1686756626/Web-Project-Template)
-贡献规范：`Web-Project-Template/贡献规范.md`
-
-### 规则
-
-- 发现新的通用经验或可复用代码时，按 `贡献规范.md` 提取到知识库
-- 提取后更新本项目的 `knowledge-map.json`（contributes 数组）和知识库的 `knowledge-map.json`
+通用经验组件库存放在 [Web-Project-Template](https://github.com/1686756626/Web-Project-Template)。
+本项目贡献了 `经验/架构/纯前端SPA-目录结构.md`（联合贡献）。
+发现新的通用经验时，加到那个仓库的对应目录。
 
 ---
 
