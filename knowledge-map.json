@@ -1,0 +1,28 @@
+{
+  "_说明": "本项目与 Web-Project-Template 的联动配置。智能体接手时先读本文件。",
+  "_知识库": "https://github.com/1686756626/Web-Project-Template",
+  "_贡献规范": "Web-Project-Template/贡献规范.md",
+
+  "contributes": [
+    {
+      "knowledge": "经验/架构/纯前端SPA-目录结构.md",
+      "source": "轻量SPA案例（无Tailwind，纯原生CSS）",
+      "status": "co-contributor",
+      "since": "2026-04-04",
+      "co-contributors": ["Teaching-Dashboard", "Finance-Manager"]
+    }
+  ],
+
+  "uses": [
+    {
+      "knowledge": "components/store.js",
+      "purpose": "localStorage读写（本项目的utils.js中有自己的简化版Store）"
+    },
+    {
+      "knowledge": "经验/架构/聊天面板组件.md",
+      "purpose": "参考了Finance-Manager的聊天面板方案"
+    }
+  ],
+
+  "pending": []
+}

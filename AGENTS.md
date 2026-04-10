@@ -127,14 +127,15 @@ sudo nginx -t && sudo nginx -s reload
 
 ## 八、通用经验知识库联动
 
-本项目的通用经验已提取到 [Web-Project-Template](https://github.com/1686756626/Web-Project-Template)：
+> 详细联动关系见 `knowledge-map.json`（机器可读）。
 
-| 本项目内容 | 知识库位置 |
-|-----------|-----------|
-| 轻量 SPA 结构（无 Tailwind） | `经验/架构/纯前端SPA-标准结构.md` |
-| JSON 数据源驱动 | `经验/架构/localStorage数据存储.md` |
-| AI 聊天面板 | `经验/架构/聊天面板组件.md` |
-| 暗黑风格 | 作为 SPA 深色模式的参考案例 |
+知识库：[Web-Project-Template](https://github.com/1686756626/Web-Project-Template)
+贡献规范：`Web-Project-Template/贡献规范.md`
+
+### 规则
+
+- 发现新的通用经验或可复用代码时，按 `贡献规范.md` 提取到知识库
+- 提取后更新本项目的 `knowledge-map.json`（contributes 数组）和知识库的 `knowledge-map.json`
 
 ---
 
