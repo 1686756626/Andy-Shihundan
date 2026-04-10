@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andy 的石鸡蛋 🥚</title>
+    <meta name="theme-color" content="#f59e0b">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥚</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+            background: #0f0f1a;
+            color: #e5e7eb;
+            min-height: 100vh;
+        }
+
+        /* ===== Navigation ===== */
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(15,15,26,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 24px; height: 60px;
+        }
+        .nav-logo {
+            font-size: 20px; font-weight: 700; color: #fbbf24;
+            display: flex; align-items: center; gap: 8px;
+            position: absolute; left: 24px;
+        }
+        .nav-tabs {
+            display: flex; gap: 4px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px; padding: 4px;
+        }
+        .nav-tab {
+            padding: 8px 24px; border-radius: 8px; border: none;
+            background: transparent; color: #9ca3af; cursor: pointer;
+            font-size: 14px; font-weight: 500; transition: all 0.2s;
+            text-decoration: none;
+        }
+        .nav-tab:hover { color: #e5e7eb; }
+        .nav-tab.active {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #0f0f1a; font-weight: 600;
+        }
+
+        /* ===== Content ===== */
+        #content {
+            padding-top: 60px;
+            min-height: 100vh;
+        }
+
+        /* ===== 丑事墙 ===== */
+        .shame-hero {
+            text-align: center; padding: 60px 24px 40px;
+            background: linear-gradient(180deg, rgba(245,158,11,0.08) 0%, transparent 100%);
+        }
+        .shame-hero h1 {
+            font-size: 48px; font-weight: 800;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b, #ef4444);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .shame-hero p { margin-top: 12px; color: #9ca3af; font-size: 16px; }
+        .shame-counter {
+            margin-top: 20px; display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2);
+            padding: 8px 20px; border-radius: 999px; font-size: 14px; color: #fbbf24;
+        }
+        .shame-counter span { font-size: 24px; font-weight: 800; }
+
+        .shame-wall {
+            max-width: 800px; margin: 0 auto; padding: 0 24px 60px;
+            display: flex; flex-direction: column; gap: 16px;
+        }
+        .shame-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px; padding: 24px;
+            transition: all 0.2s; position: relative; overflow: hidden;
+        }
+        .shame-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #fbbf24, #ef4444);
+        }
+        .shame-card:hover {
+            border-color: rgba(245,158,11,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(245,158,11,0.08);
+        }
+        .shame-card .shame-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .shame-card .shame-tag {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(245,158,11,0.12); color: #fbbf24;
+            padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;
+        }
+        .shame-card .shame-date { font-size: 13px; color: #6b7280; }
+        .shame-card .shame-text { font-size: 16px; line-height: 1.7; color: #d1d5db; }
+        .shame-card .shame-footer { margin-top: 16px; display: flex; align-items: center; gap: 8px; }
+        .shame-card .shame-footer .witness {
+            font-size: 12px; color: #6b7280;
+            background: rgba(255,255,255,0.04); padding: 4px 10px; border-radius: 6px;
+        }
+
+        /* ===== AI Chat ===== */
+        .chat-page {
+            display: flex; flex-direction: column;
+            height: calc(100vh - 60px);
+        }
+        .chat-welcome {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 16px; padding: 24px;
+        }
+        .chat-welcome .emoji { font-size: 64px; }
+        .chat-welcome h2 { font-size: 24px; font-weight: 700; color: #fbbf24; }
+        .chat-welcome p { color: #9ca3af; text-align: center; max-width: 400px; line-height: 1.6; }
+
+        .chat-messages {
+            flex: 1; overflow-y: auto; padding: 24px;
+            display: flex; flex-direction: column; gap: 16px;
+        }
+        .chat-messages:empty { display: none; }
+
+        .chat-msg { max-width: 80%; animation: fadeIn 0.2s; }
+        .chat-msg.user { align-self: flex-end; }
+        .chat-msg.ai { align-self: flex-start; }
+        .chat-msg .bubble {
+            padding: 12px 16px; border-radius: 16px; font-size: 14px;
+            line-height: 1.7; white-space: pre-wrap; word-break: break-word;
+        }
+        .chat-msg.user .bubble {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #0f0f1a; font-weight: 500; border-bottom-right-radius: 4px;
+        }
+        .chat-msg.ai .bubble {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #e5e7eb; border-bottom-left-radius: 4px;
+        }
+
+        .chat-input-area {
+            padding: 16px 24px 24px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .chat-input-wrap {
+            max-width: 800px; margin: 0 auto;
+            display: flex; gap: 12px; align-items: flex-end;
+        }
+        .chat-input-wrap textarea {
+            flex: 1; resize: none; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04); color: #e5e7eb;
+            border-radius: 14px; padding: 12px 16px; font-size: 14px;
+            font-family: inherit; line-height: 1.5;
+            min-height: 48px; max-height: 120px;
+            outline: none; transition: border-color 0.2s;
+        }
+        .chat-input-wrap textarea:focus { border-color: rgba(245,158,11,0.4); }
+        .chat-input-wrap textarea::placeholder { color: #6b7280; }
+        .chat-send-btn {
+            width: 48px; height: 48px; border-radius: 14px; border: none;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #0f0f1a; cursor: pointer; font-size: 18px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .chat-send-btn:hover { transform: scale(1.05); }
+        .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        /* ===== Animations ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== Mobile ===== */
+        @media (max-width: 640px) {
+            .shame-hero h1 { font-size: 32px; }
+            .nav-logo { display: none; }
+            .nav-tab { padding: 8px 16px; font-size: 13px; }
+            .chat-msg { max-width: 90%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-logo">🥚 Andy 的石鸡蛋</div>
+        <div class="nav-tabs">
+            <a class="nav-tab active" data-page="shame" href="#shame" onclick="app.route()">🤡 丑事墙</a>
+            <a class="nav-tab" data-page="chat" href="#chat" onclick="app.route()">🤖 AI 聊天</a>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div id="content"></div>
+
+    <!-- JS 加载顺序：config → utils → app → pages -->
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="app.js"></script>
+    <script src="pages/shame.js"></script>
+    <script src="pages/chat.js"></script>
+</body>
+</html>
