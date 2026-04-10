@@ -125,7 +125,20 @@ sudo nginx -t && sudo nginx -s reload
 
 ---
 
-## 八、注意事项
+## 八、通用经验知识库联动
+
+本项目的通用经验已提取到 [Web-Project-Template](https://github.com/1686756626/Web-Project-Template)：
+
+| 本项目内容 | 知识库位置 |
+|-----------|-----------|
+| 轻量 SPA 结构（无 Tailwind） | `经验/架构/纯前端SPA-标准结构.md` |
+| JSON 数据源驱动 | `经验/架构/localStorage数据存储.md` |
+| AI 聊天面板 | `经验/架构/聊天面板组件.md` |
+| 暗黑风格 | 作为 SPA 深色模式的参考案例 |
+
+---
+
+## 九、注意事项
 
 - `shame.json` 用 UTF-8 编码，换行 LF
 - AI 聊天的 agentId 配置在 `config.js` 的 `chat.agentId`
