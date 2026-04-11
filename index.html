@@ -305,10 +305,48 @@
             padding: 12px 24px 20px;
             border-top: 1px solid rgba(255,255,255,0.06);
         }
+        .chat-file-preview {
+            display: none; flex-wrap: wrap; gap: 8px;
+            margin-bottom: 10px; padding: 0 4px;
+        }
+        .file-item {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; padding: 6px 10px; position: relative; max-width: 200px;
+        }
+        .file-item.file-img {
+            max-width: 120px; flex-direction: column; padding: 6px;
+        }
+        .file-item.file-img img {
+            width: 80px; height: 60px; object-fit: cover; border-radius: 6px;
+        }
+        .file-icon { font-size: 20px; flex-shrink: 0; }
+        .file-info {
+            display: flex; flex-direction: column; min-width: 0;
+        }
+        .file-info span:first-child {
+            font-size: 12px; color: #e5e7eb;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .file-info span:last-child { font-size: 10px; color: #6b7280; }
+        .file-remove {
+            position: absolute; top: -6px; right: -6px;
+            width: 18px; height: 18px; border-radius: 50%; border: none;
+            background: #ef4444; color: white; font-size: 10px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            line-height: 1; padding: 0;
+        }
         .chat-input-wrap {
             max-width: 800px; margin: 0 auto;
-            display: flex; gap: 12px; align-items: flex-end;
+            display: flex; gap: 8px; align-items: flex-end;
         }
+        .chat-attach-btn {
+            width: 44px; height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.04); color: #9ca3af;
+            font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .chat-attach-btn:hover { color: #fbbf24; border-color: rgba(245,158,11,0.3); }
         .chat-input-wrap textarea {
             flex: 1; resize: none; border: 1px solid rgba(255,255,255,0.1);
             background: rgba(255,255,255,0.04); color: #e5e7eb;
@@ -328,6 +366,30 @@
         }
         .chat-send-btn:hover { transform: scale(1.05); }
         .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        /* ===== Drag & Drop Overlay ===== */
+        .chat-body.drag-over::after {
+            content: '📎 松开上传文件';
+            position: absolute; inset: 0; z-index: 10;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(15,15,26,0.85); border: 2px dashed #f59e0b;
+            border-radius: 12px; margin: 12px;
+            font-size: 18px; color: #fbbf24; font-weight: 600;
+            pointer-events: none;
+        }
+        .chat-body { position: relative; }
+
+        /* ===== Message Images & Files ===== */
+        .msg-image { margin-bottom: 8px; }
+        .msg-image img {
+            max-width: 260px; max-height: 200px; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .msg-file-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.08); padding: 4px 10px;
+            border-radius: 6px; font-size: 12px; color: #d1d5db; margin-bottom: 4px;
+        }
 
         /* ===== Animations ===== */
         @keyframes fadeIn {
@@ -379,6 +441,6 @@
     <script src="utils.js?v=2"></script>
     <script src="app.js?v=1"></script>
     <script src="pages/shame.js?v=1"></script>
-    <script src="pages/chat.js?v=4"></script>
+    <script src="pages/chat.js?v=5"></script>
 </body>
 </html>
