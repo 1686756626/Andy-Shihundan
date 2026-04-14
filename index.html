@@ -436,11 +436,12 @@
     <!-- Content -->
     <div id="content"></div>
 
-    <!-- JS 加载顺序：config → utils → app → pages -->
+    <!-- JS 加载顺序：mammoth → config → utils → app → pages -->
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
     <script src="config.js?v=2"></script>
     <script src="utils.js?v=2"></script>
     <script src="app.js?v=1"></script>
     <script src="pages/shame.js?v=1"></script>
-    <script src="pages/chat.js?v=5"></script>
+    <script src="pages/chat.js?v=6"></script>
 </body>
 </html>

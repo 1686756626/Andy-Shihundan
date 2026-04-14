@@ -131,7 +131,7 @@ Object.assign(app, {
                     <div class="chat-input-area">
                         <div class="chat-file-preview" id="chat-file-preview"></div>
                         <div class="chat-input-wrap">
-                            <input type="file" id="chat-file-input" multiple hidden accept="image/*,.txt,.md,.json,.csv,.xml,.html,.css,.js,.py,.java,.c,.cpp,.h,.go,.rs,.ts,.tsx,.jsx,.yaml,.yml,.toml,.ini,.cfg,.log,.sql,.sh,.bat,.ps1,.rb,.php,.swift,.kt,.r,.m,.lua,.pl,.scala">
+                            <input type="file" id="chat-file-input" multiple hidden accept="image/*,.txt,.md,.json,.csv,.xml,.html,.css,.js,.py,.java,.c,.cpp,.h,.go,.rs,.ts,.tsx,.jsx,.yaml,.yml,.toml,.ini,.cfg,.log,.sql,.sh,.bat,.ps1,.rb,.php,.swift,.kt,.r,.m,.lua,.pl,.scala,.docx,.pdf">
                             <button class="chat-attach-btn" id="chat-attach" title="上传文件">📎</button>
                             <textarea id="chat-input" rows="1"
                                 placeholder="${CONFIG.chat.placeholder}"
@@ -355,6 +355,7 @@ Object.assign(app, {
             'js': '📜', 'ts': '📜', 'py': '🐍', 'java': '☕', 'c': '⚙️', 'cpp': '⚙️',
             'json': '📋', 'csv': '📊', 'md': '📝', 'txt': '📄', 'html': '🌐', 'css': '🎨',
             'xml': '📋', 'sql': '🗃️', 'sh': '🖥️', 'yaml': '📋', 'yml': '📋',
+            'docx': '📘', 'doc': '📘', 'pdf': '📕',
             'png': '🖼️', 'jpg': '🖼️', 'jpeg': '🖼️', 'gif': '🖼️', 'webp': '🖼️', 'svg': '🖼️'
         };
         return map[ext] || '📎';
@@ -379,12 +380,36 @@ Object.assign(app, {
         });
     },
 
+    _readFileAsArrayBuffer(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsArrayBuffer(file);
+        });
+    },
+
+    async _extractDocxText(file) {
+        try {
+            if (typeof mammoth === 'undefined') {
+                return '[Word 文档解析库加载失败，请刷新页面重试]';
+            }
+            const buffer = await this._readFileAsArrayBuffer(file);
+            const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+            return result.value || '[Word 文档内容为空]';
+        } catch (e) {
+            return '[Word 文档解析失败: ' + e.message + ']';
+        }
+    },
+
     async _prepareFiles() {
         const contentParts = [];
         const fileHtmlParts = [];
 
         for (const file of this._pendingFiles) {
             const isImage = file.type.startsWith('image/');
+            const ext = (file.name || '').split('.').pop().toLowerCase();
+            const isDocx = ext === 'docx' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
             if (isImage) {
                 // 图片：用 base64 data URL 传给 API
@@ -394,8 +419,16 @@ Object.assign(app, {
                     image_url: { url: dataUrl }
                 });
                 fileHtmlParts.push(`<div class="msg-image"><img src="${dataUrl}" alt="${this._escapeAttr(file.name)}"></div>`);
+            } else if (isDocx) {
+                // Word 文档：用 mammoth.js 提取文本
+                const text = await this._extractDocxText(file);
+                contentParts.push({
+                    type: 'text',
+                    text: `\n--- 文件: ${file.name} ---\n${text}\n--- 文件结束 ---\n`
+                });
+                fileHtmlParts.push(`<div class="msg-file-badge">${this._fileIcon(file.name)} ${this._escapeAttr(file.name)}</div>`);
             } else {
-                // 文本文件：读取内容拼到文本里
+                // 其他文本文件：读取内容拼到文本里
                 const text = await this._readFileAsText(file);
                 contentParts.push({
                     type: 'text',
