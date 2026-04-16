@@ -131,7 +131,7 @@ Object.assign(app, {
                     <div class="chat-input-area">
                         <div class="chat-file-preview" id="chat-file-preview"></div>
                         <div class="chat-input-wrap">
-                            <input type="file" id="chat-file-input" multiple hidden accept="image/*,.txt,.md,.json,.csv,.xml,.html,.css,.js,.py,.java,.c,.cpp,.h,.go,.rs,.ts,.tsx,.jsx,.yaml,.yml,.toml,.ini,.cfg,.log,.sql,.sh,.bat,.ps1,.rb,.php,.swift,.kt,.r,.m,.lua,.pl,.scala,.docx,.pdf">
+                            <input type="file" id="chat-file-input" multiple hidden accept="image/*,.txt,.md,.json,.csv,.xml,.html,.css,.js,.py,.java,.c,.cpp,.h,.go,.rs,.ts,.tsx,.jsx,.yaml,.yml,.toml,.ini,.cfg,.log,.sql,.sh,.bat,.ps1,.rb,.php,.swift,.kt,.r,.m,.lua,.pl,.scala,.docx,.doc,.wps,.rtf,.odt,.pdf,.xls,.xlsx,.ppt,.pptx">
                             <button class="chat-attach-btn" id="chat-attach" title="上传文件">📎</button>
                             <textarea id="chat-input" rows="1"
                                 placeholder="${CONFIG.chat.placeholder}"
@@ -355,7 +355,8 @@ Object.assign(app, {
             'js': '📜', 'ts': '📜', 'py': '🐍', 'java': '☕', 'c': '⚙️', 'cpp': '⚙️',
             'json': '📋', 'csv': '📊', 'md': '📝', 'txt': '📄', 'html': '🌐', 'css': '🎨',
             'xml': '📋', 'sql': '🗃️', 'sh': '🖥️', 'yaml': '📋', 'yml': '📋',
-            'docx': '📘', 'doc': '📘', 'pdf': '📕',
+            'docx': '📘', 'doc': '📘', 'wps': '📘', 'rtf': '📘', 'odt': '📘',
+            'pdf': '📕', 'xls': '📗', 'xlsx': '📗', 'ppt': '📙', 'pptx': '📙',
             'png': '🖼️', 'jpg': '🖼️', 'jpeg': '🖼️', 'gif': '🖼️', 'webp': '🖼️', 'svg': '🖼️'
         };
         return map[ext] || '📎';
@@ -402,14 +403,37 @@ Object.assign(app, {
         }
     },
 
+    async _convertViaServer(file) {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const resp = await fetch('/convert-api/convert', {
+                method: 'POST',
+                body: formData,
+            });
+            if (!resp.ok) {
+                const err = await resp.json().catch(() => ({}));
+                throw new Error(err.detail || '转换失败');
+            }
+            const data = await resp.json();
+            return data.text || '[文件内容为空]';
+        } catch (e) {
+            return '[文件转换失败: ' + e.message + ']';
+        }
+    },
+
     async _prepareFiles() {
         const contentParts = [];
         const fileHtmlParts = [];
+
+        // 需要服务器端转换的格式
+        const serverConvertExts = new Set(['doc', 'wps', 'rtf', 'odt', 'xls', 'xlsx', 'ppt', 'pptx', 'pdf']);
 
         for (const file of this._pendingFiles) {
             const isImage = file.type.startsWith('image/');
             const ext = (file.name || '').split('.').pop().toLowerCase();
             const isDocx = ext === 'docx' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            const needsServerConvert = serverConvertExts.has(ext);
 
             if (isImage) {
                 // 图片：用 base64 data URL 传给 API
@@ -420,15 +444,23 @@ Object.assign(app, {
                 });
                 fileHtmlParts.push(`<div class="msg-image"><img src="${dataUrl}" alt="${this._escapeAttr(file.name)}"></div>`);
             } else if (isDocx) {
-                // Word 文档：用 mammoth.js 提取文本
+                // .docx：用 mammoth.js 前端解析（更快）
                 const text = await this._extractDocxText(file);
                 contentParts.push({
                     type: 'text',
                     text: `\n--- 文件: ${file.name} ---\n${text}\n--- 文件结束 ---\n`
                 });
                 fileHtmlParts.push(`<div class="msg-file-badge">${this._fileIcon(file.name)} ${this._escapeAttr(file.name)}</div>`);
+            } else if (needsServerConvert) {
+                // doc/wps/rtf/odt/xls/xlsx/ppt/pptx/pdf：走服务器 LibreOffice 转换
+                const text = await this._convertViaServer(file);
+                contentParts.push({
+                    type: 'text',
+                    text: `\n--- 文件: ${file.name} ---\n${text}\n--- 文件结束 ---\n`
+                });
+                fileHtmlParts.push(`<div class="msg-file-badge">${this._fileIcon(file.name)} ${this._escapeAttr(file.name)}</div>`);
             } else {
-                // 其他文本文件：读取内容拼到文本里
+                // 其他文本文件：直接读取
                 const text = await this._readFileAsText(file);
                 contentParts.push({
                     type: 'text',
